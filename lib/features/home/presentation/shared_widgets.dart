@@ -87,7 +87,7 @@ class OrderItem extends StatelessWidget {
                 ),
               ),
               Text(
-                '${order.price} EGP',
+                '${order.price.toStringAsFixed(0)} EGP',
                 style: const TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w700,
@@ -106,7 +106,7 @@ class OrderItem extends StatelessWidget {
               ),
               const SizedBox(width: 4),
               Text(
-                '${order.distanceKm} km',
+                '${order.distanceKm.toStringAsFixed(1)} km',
                 style: const TextStyle(
                   fontSize: 12,
                   color: ColorManager.textSecondary,
@@ -120,7 +120,7 @@ class OrderItem extends StatelessWidget {
               ),
               const SizedBox(width: 4),
               Text(
-                '${order.durationMin} min',
+                '${order.durationMin.toStringAsFixed(0)} min',
                 style: const TextStyle(
                   fontSize: 12,
                   color: ColorManager.textSecondary,

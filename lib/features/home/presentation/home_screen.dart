@@ -127,21 +127,10 @@ class _HomePageState extends State<HomePage> {
                                       shrinkWrap: true,
                                       physics:
                                           const NeverScrollableScrollPhysics(),
-                                      itemCount: 1,
+                                      itemCount: state.orders?.length ?? 0,
                                       itemBuilder: (context, index) {
                                         return OrderItem(
-                                          order:
-                                              state.order ??
-                                              OrderModel(
-                                                id: '123456',
-                                                destination: 'Cairo',
-                                                distanceKm: 54,
-                                                durationMin: 55,
-                                                price: 350,
-                                                destinationLat: 30.046361,
-                                                destinationLng: 31.234922,
-                                                passengerId: '30.046361',
-                                              ),
+                                          order: state.orders![index],
                                           onReject: () => {},
                                           onAccept: () => {},
                                         );

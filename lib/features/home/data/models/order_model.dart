@@ -1,15 +1,18 @@
 class OrderModel {
-  final String id;
+  final String? id;
   final String destination;
   final double distanceKm;
   final double durationMin;
   final double price;
   final double destinationLat;
+  final double passengerLat;
   final double destinationLng;
+  final double passengerLng;
   final String passengerId;
+  final String? status;
 
   const OrderModel({
-    required this.id,
+    this.id,
     required this.destination,
     required this.distanceKm,
     required this.durationMin,
@@ -17,6 +20,9 @@ class OrderModel {
     required this.destinationLat,
     required this.destinationLng,
     required this.passengerId,
+    this.status,
+    required this.passengerLat,
+    required this.passengerLng,
   });
 
   factory OrderModel.fromJson(Map<String, dynamic> json) {
@@ -29,6 +35,9 @@ class OrderModel {
       destinationLat: (json['destination_lat'] as num).toDouble(),
       destinationLng: (json['destination_lng'] as num).toDouble(),
       passengerId: json['passenger_id'] ?? '',
+      status: json['status'] ?? 'pending',
+      passengerLat: (json['passenger_lat'] as num).toDouble(),
+      passengerLng: (json['passenger_lng'] as num).toDouble(),
     );
   }
 
@@ -42,6 +51,9 @@ class OrderModel {
       'destination_lat': destinationLat,
       'destination_lng': destinationLng,
       'passenger_id': passengerId,
+      'status': status ?? 'pending',
+      'passenger_lat': passengerLat,
+      'passenger_lng': passengerLng,
     };
   }
 }

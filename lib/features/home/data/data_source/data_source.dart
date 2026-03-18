@@ -1,4 +1,7 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:go_driver/core/constants/app_constants.dart';
 import 'package:go_driver/core/utils/typedef.dart';
+import 'package:go_driver/features/home/data/models/order_model.dart';
 import 'package:go_driver/features/home/data/models/route_model.dart';
 import 'package:go_driver/features/home/data/models/route_prams.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -6,28 +9,33 @@ import 'package:open_route_service/open_route_service.dart';
 import 'package:osm_nominatim/osm_nominatim.dart';
 
 abstract class HomeDataSource {
+  //Map
   Places searchPlaces(String query);
   Future<String> reverseGeocoding(LatLng position);
   Future<RouteModel> getRouteCoordinates(RoutePrams params);
+
+  //Firebase
+  Stream<List<OrderModel>> getOrders();
 }
 
 class HomeDataSourceImpl implements HomeDataSource {
-  final Nominatim _nominatim;
-  final OpenRouteService _ors;
-  HomeDataSourceImpl(this._nominatim, this._ors);
+  final Nominatim nominatim;
+  final OpenRouteService ors;
+  final FirebaseFirestore firestore;
+  HomeDataSourceImpl({
+    required this.nominatim,
+    required this.ors,
+    required this.firestore,
+  });
 
   @override
   Places searchPlaces(String query) async {
-    return _nominatim.searchByName(
-      query: query,
-      limit: 5,
-      countryCodes: ['eg'],
-    );
+    return nominatim.searchByName(query: query, limit: 5, countryCodes: ['eg']);
   }
 
   @override
   Future<RouteModel> getRouteCoordinates(RoutePrams params) async {
-    final response = await _ors.directionsRouteGeoJsonGet(
+    final response = await ors.directionsRouteGeoJsonGet(
       startCoordinate: ORSCoordinate(
         latitude: params.position.latitude,
         longitude: params.position.longitude,
@@ -55,11 +63,27 @@ class HomeDataSourceImpl implements HomeDataSource {
 
   @override
   Future<String> reverseGeocoding(LatLng position) async {
-    final place = await _nominatim.reverseSearch(
+    final place = await nominatim.reverseSearch(
       lat: position.latitude,
       lon: position.longitude,
       language: 'ar',
     );
     return place.displayName;
+  }
+
+  @override
+  Stream<List<OrderModel>> getOrders() {
+    return firestore
+        .collection(AppConstants.ordersCollection)
+        .where(
+          AppConstants.statusConditionParam,
+          isEqualTo: AppConstants.pendingStatus,
+        )
+        .snapshots()
+        .map(
+          (snapshot) => snapshot.docs
+              .map((doc) => OrderModel.fromJson(doc.data()))
+              .toList(),
+        );
   }
 }

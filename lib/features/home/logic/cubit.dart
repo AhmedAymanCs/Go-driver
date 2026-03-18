@@ -5,6 +5,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:go_driver/core/constants/color_manager.dart';
 import 'package:go_driver/core/constants/image_manager.dart';
 import 'package:go_driver/core/constants/styles_manager.dart';
+import 'package:go_driver/features/home/data/models/order_model.dart';
 import 'package:go_driver/features/home/data/models/route_prams.dart';
 import 'package:go_driver/features/home/data/repository/repo.dart';
 import 'package:go_driver/features/home/logic/states.dart';
@@ -16,11 +17,15 @@ class HomeCubit extends Cubit<HomeState> {
   final HomeRepository _homeRepository;
   HomeCubit(this._homeRepository) : super(HomeState());
 
-  StreamSubscription<Position>? _positionStream;
+  StreamSubscription<Position>?
+  _positionStream; //for get current location stream
+  StreamSubscription<List<OrderModel>>?
+  _ordersSubscription; //for listen to orders stream
 
   void init(BuildContext context) async {
     final mapStyle = await setMapStyle(context);
     emit(state.copyWith(mapStyle: mapStyle));
+    listenToOrders();
   }
 
   Future<String> setMapStyle(BuildContext context) async {
@@ -146,11 +151,31 @@ class HomeCubit extends Cubit<HomeState> {
 
   void toggleStatus() {
     emit(state.copyWith(isOnline: !state.isOnline));
+    if (state.isOnline) {
+      listenToOrders();
+    } else {
+      _ordersSubscription?.cancel();
+      emit(state.copyWith(orders: []));
+    }
+  }
+
+  void listenToOrders() async {
+    final res = await _homeRepository.getOrders();
+    res.fold(
+      (error) => emit(state.copyWith(error: error, status: HomeStatus.error)),
+      (stream) {
+        _ordersSubscription = stream.listen((orders) {
+          emit(state.copyWith(orders: orders, status: HomeStatus.success));
+          print('orders: ${orders.length}');
+        });
+      },
+    );
   }
 
   @override
   Future<void> close() {
     _positionStream?.cancel();
+    _ordersSubscription?.cancel();
     return super.close();
   }
 }
