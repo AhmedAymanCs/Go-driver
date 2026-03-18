@@ -166,10 +166,20 @@ class HomeCubit extends Cubit<HomeState> {
       (stream) {
         _ordersSubscription = stream.listen((orders) {
           emit(state.copyWith(orders: orders, status: HomeStatus.success));
-          print('orders: ${orders.length}');
         });
       },
     );
+  }
+
+  double getDistanceToPassenger(OrderModel order) {
+    if (state.position == null) return 0;
+    final distanceInMeters = Geolocator.distanceBetween(
+      state.position!.latitude,
+      state.position!.longitude,
+      order.passengerLat,
+      order.passengerLng,
+    );
+    return distanceInMeters / 1000;
   }
 
   @override

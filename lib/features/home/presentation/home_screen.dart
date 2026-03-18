@@ -4,7 +4,6 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:go_driver/core/constants/color_manager.dart';
 import 'package:go_driver/core/constants/font_manager.dart';
 import 'package:go_driver/core/di/service_locator.dart';
-import 'package:go_driver/features/home/data/models/order_model.dart';
 import 'package:go_driver/features/home/data/repository/repo.dart';
 import 'package:go_driver/features/home/logic/cubit.dart';
 import 'package:go_driver/features/home/logic/states.dart';
@@ -131,6 +130,10 @@ class _HomePageState extends State<HomePage> {
                                       itemBuilder: (context, index) {
                                         return OrderItem(
                                           order: state.orders![index],
+                                          distanceToPassenger: cubit
+                                              .getDistanceToPassenger(
+                                                state.orders![index],
+                                              ),
                                           onReject: () => {},
                                           onAccept: () => {},
                                         );
