@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:go_driver/core/constants/color_manager.dart';
+import 'package:go_driver/core/constants/font_manager.dart';
 import 'package:go_driver/core/di/service_locator.dart';
 import 'package:go_driver/features/home/data/models/order_model.dart';
 import 'package:go_driver/features/home/data/repository/repo.dart';
@@ -45,80 +46,116 @@ class _HomePageState extends State<HomePage> {
         builder: (context, state) {
           final cubit = context.read<HomeCubit>();
           return Scaffold(
-            body: Stack(
-              children: [
-                const Map(),
-                Positioned(
-                  top: 10,
-                  left: 10,
-                  child: IconButton(
-                    onPressed: () => cubit.moveTo(
-                      LatLng(
-                        state.position!.latitude,
-                        state.position!.longitude,
+            body: SafeArea(
+              child: Stack(
+                children: [
+                  const Map(),
+                  Positioned(
+                    top: 10,
+                    left: 10,
+                    child: CircleAvatar(
+                      backgroundColor: ColorManager.navyLight,
+                      child: IconButton(
+                        onPressed: () => cubit.moveTo(
+                          LatLng(
+                            state.position!.latitude,
+                            state.position!.longitude,
+                          ),
+                          isCurrentLocation: true,
+                          zoom: 17,
+                        ),
+                        icon: Icon(Icons.gps_fixed, color: Colors.white),
                       ),
-                      isCurrentLocation: true,
-                      zoom: 17,
                     ),
-                    icon: Icon(Icons.gps_fixed, color: Colors.white),
                   ),
-                ),
-                DraggableScrollableSheet(
-                  initialChildSize: 0.5,
-                  minChildSize: 0.25,
-                  builder: (context, scrollController) {
-                    return Container(
-                      padding: const EdgeInsets.all(16),
-                      decoration: const BoxDecoration(
-                        color: ColorManager.backgroundWhite,
-                        borderRadius: BorderRadius.vertical(
-                          top: Radius.circular(20),
-                        ),
+                  Positioned(
+                    top: 10,
+                    right: 10,
+                    child: Container(
+                      width: 200,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(30),
+                        color: state.isOnline
+                            ? Colors.transparent
+                            : ColorManager.error,
                       ),
-                      child: SingleChildScrollView(
-                        controller: scrollController,
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Container(
-                              width: 40,
-                              height: 4,
-                              margin: const EdgeInsets.only(bottom: 12),
-                              decoration: BoxDecoration(
-                                color: ColorManager.gray500,
-                                borderRadius: BorderRadius.circular(2),
-                              ),
-                            ),
-                            ListView.builder(
-                              shrinkWrap: true,
-                              physics: const NeverScrollableScrollPhysics(),
-                              itemCount: 1,
-                              itemBuilder: (context, index) {
-                                return OrderItem(
-                                  order:
-                                      state.order ??
-                                      OrderModel(
-                                        id: '123456',
-                                        destination: 'Cairo',
-                                        distanceKm: 54,
-                                        durationMin: 55,
-                                        price: 350,
-                                        destinationLat: 30.046361,
-                                        destinationLng: 31.234922,
-                                        passengerId: '30.046361',
+                      child: SwitchListTile(
+                        value: state.isOnline,
+                        onChanged: (_) => cubit.toggleStatus(),
+                        title: Text(
+                          state.isOnline ? 'Online' : 'Offline',
+                          style: TextStyle(
+                            color: state.isOnline
+                                ? ColorManager.greenAccent
+                                : Colors.white,
+                            fontWeight: FontWeightManager.semiBold,
+                          ),
+                        ),
+                        activeThumbColor: ColorManager.greenAccent,
+                        inactiveThumbColor: ColorManager.error,
+                      ),
+                    ),
+                  ),
+                  DraggableScrollableSheet(
+                    initialChildSize: 0.5,
+                    minChildSize: 0.25,
+                    builder: (context, scrollController) {
+                      return Container(
+                        padding: const EdgeInsets.all(16),
+                        decoration: const BoxDecoration(
+                          color: ColorManager.backgroundWhite,
+                          borderRadius: BorderRadius.vertical(
+                            top: Radius.circular(20),
+                          ),
+                        ),
+                        child: state.isOnline
+                            ? SingleChildScrollView(
+                                controller: scrollController,
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Container(
+                                      width: 40,
+                                      height: 4,
+                                      margin: const EdgeInsets.only(bottom: 12),
+                                      decoration: BoxDecoration(
+                                        color: ColorManager.gray500,
+                                        borderRadius: BorderRadius.circular(2),
                                       ),
-                                  onReject: () => {},
-                                  onAccept: () => {},
-                                );
-                              },
-                            ),
-                          ],
-                        ),
-                      ),
-                    );
-                  },
-                ),
-              ],
+                                    ),
+                                    ListView.builder(
+                                      shrinkWrap: true,
+                                      physics:
+                                          const NeverScrollableScrollPhysics(),
+                                      itemCount: 1,
+                                      itemBuilder: (context, index) {
+                                        return OrderItem(
+                                          order:
+                                              state.order ??
+                                              OrderModel(
+                                                id: '123456',
+                                                destination: 'Cairo',
+                                                distanceKm: 54,
+                                                durationMin: 55,
+                                                price: 350,
+                                                destinationLat: 30.046361,
+                                                destinationLng: 31.234922,
+                                                passengerId: '30.046361',
+                                              ),
+                                          onReject: () => {},
+                                          onAccept: () => {},
+                                        );
+                                      },
+                                    ),
+                                  ],
+                                ),
+                              )
+                            : Center(child: Text('Offline Mode')),
+                      );
+                    },
+                  ),
+                ],
+              ),
             ),
           );
         },

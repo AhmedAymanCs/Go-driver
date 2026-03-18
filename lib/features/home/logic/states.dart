@@ -7,6 +7,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 enum HomeStatus { initial, loading, success, error }
 
 class HomeState extends Equatable {
+  final bool isOnline;
   final HomeStatus status;
   final String error;
   final String mapStyle;
@@ -32,6 +33,7 @@ class HomeState extends Equatable {
     this.polylines = const {},
     this.route,
     this.order,
+    this.isOnline = false,
   });
   HomeState copyWith({
     HomeStatus? status,
@@ -46,6 +48,7 @@ class HomeState extends Equatable {
     Set<Polyline>? polylines,
     RouteModel? route,
     OrderModel? order,
+    bool? isOnline,
   }) {
     return HomeState(
       status: status ?? this.status,
@@ -60,6 +63,7 @@ class HomeState extends Equatable {
       polylines: polylines ?? this.polylines,
       route: route ?? this.route,
       order: order ?? this.order,
+      isOnline: isOnline ?? this.isOnline,
     );
   }
 
@@ -77,5 +81,6 @@ class HomeState extends Equatable {
     polylines,
     route,
     order,
+    isOnline,
   ];
 }

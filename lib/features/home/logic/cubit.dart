@@ -144,12 +144,8 @@ class HomeCubit extends Cubit<HomeState> {
     );
   }
 
-  Future<String> reverseGeocoding(LatLng position) async {
-    final res = await _homeRepository.reverseGeocoding(position);
-    return res.fold((error) {
-      emit(state.copyWith(error: error, status: HomeStatus.error));
-      return 'Unknown';
-    }, (placeName) => placeName);
+  void toggleStatus() {
+    emit(state.copyWith(isOnline: !state.isOnline));
   }
 
   @override
