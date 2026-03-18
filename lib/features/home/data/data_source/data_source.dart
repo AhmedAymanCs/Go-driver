@@ -1,0 +1,65 @@
+import 'package:go_driver/core/utils/typedef.dart';
+import 'package:go_driver/features/home/data/models/route_model.dart';
+import 'package:go_driver/features/home/data/models/route_prams.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:open_route_service/open_route_service.dart';
+import 'package:osm_nominatim/osm_nominatim.dart';
+
+abstract class HomeDataSource {
+  Places searchPlaces(String query);
+  Future<String> reverseGeocoding(LatLng position);
+  Future<RouteModel> getRouteCoordinates(RoutePrams params);
+}
+
+class HomeDataSourceImpl implements HomeDataSource {
+  final Nominatim _nominatim;
+  final OpenRouteService _ors;
+  HomeDataSourceImpl(this._nominatim, this._ors);
+
+  @override
+  Places searchPlaces(String query) async {
+    return _nominatim.searchByName(
+      query: query,
+      limit: 5,
+      countryCodes: ['eg'],
+    );
+  }
+
+  @override
+  Future<RouteModel> getRouteCoordinates(RoutePrams params) async {
+    final response = await _ors.directionsRouteGeoJsonGet(
+      startCoordinate: ORSCoordinate(
+        latitude: params.position.latitude,
+        longitude: params.position.longitude,
+      ),
+      endCoordinate: ORSCoordinate(
+        latitude: params.destination.latitude,
+        longitude: params.destination.longitude,
+      ),
+    );
+
+    final summary =
+        response.features[0].properties['summary'] as Map<String, dynamic>;
+    final double distanceKm = (summary['distance'] as num).toDouble() / 1000;
+    return RouteModel(
+      placeName: params.placeName,
+      points: response.features[0].geometry.coordinates
+          .expand((e) => e)
+          .map((e) => LatLng(e.latitude, e.longitude))
+          .toList(),
+      distanceKm: distanceKm,
+      price: 0, //TODO: getPrice price
+      durationMin: (summary['duration'] as num).toDouble() / 600,
+    );
+  }
+
+  @override
+  Future<String> reverseGeocoding(LatLng position) async {
+    final place = await _nominatim.reverseSearch(
+      lat: position.latitude,
+      lon: position.longitude,
+      language: 'ar',
+    );
+    return place.displayName;
+  }
+}
