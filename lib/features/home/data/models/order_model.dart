@@ -21,14 +21,14 @@ class OrderModel {
 
   factory OrderModel.fromJson(Map<String, dynamic> json) {
     return OrderModel(
-      id: json['id'],
-      destination: json['destination'],
+      id: json['id'] ?? '',
+      destination: json['destination'] ?? "Not Found",
       distanceKm: (json['distance_km'] as num).toDouble(),
       durationMin: (json['duration_min'] as num).toDouble(),
       price: (json['price'] as num).toDouble(),
       destinationLat: (json['destination_lat'] as num).toDouble(),
       destinationLng: (json['destination_lng'] as num).toDouble(),
-      passengerId: json['passenger_id'],
+      passengerId: json['passenger_id'] ?? '',
     );
   }
 
