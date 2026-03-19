@@ -20,6 +20,7 @@ class HomeState extends Equatable {
   final Set<Polyline> polylines;
   final RouteModel? route;
   final List<OrderModel>? orders;
+  final OrderModel? currentOrder;
   const HomeState({
     this.status = HomeStatus.initial,
     this.error = '',
@@ -33,7 +34,8 @@ class HomeState extends Equatable {
     this.polylines = const {},
     this.route,
     this.orders,
-    this.isOnline = false,
+    this.isOnline = true,
+    this.currentOrder,
   });
   HomeState copyWith({
     HomeStatus? status,
@@ -49,6 +51,7 @@ class HomeState extends Equatable {
     RouteModel? route,
     List<OrderModel>? orders,
     bool? isOnline,
+    OrderModel? currentOrder,
   }) {
     return HomeState(
       status: status ?? this.status,
@@ -64,6 +67,7 @@ class HomeState extends Equatable {
       route: route ?? this.route,
       orders: orders ?? this.orders,
       isOnline: isOnline ?? this.isOnline,
+      currentOrder: currentOrder ?? this.currentOrder,
     );
   }
 
@@ -82,5 +86,6 @@ class HomeState extends Equatable {
     route,
     orders,
     isOnline,
+    currentOrder,
   ];
 }

@@ -1,6 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:go_driver/core/constants/app_constants.dart';
 import 'package:go_driver/core/utils/typedef.dart';
+import 'package:go_driver/features/home/data/models/accept_model.dart';
+import 'package:go_driver/features/home/data/models/location_model.dart';
 import 'package:go_driver/features/home/data/models/order_model.dart';
 import 'package:go_driver/features/home/data/models/route_model.dart';
 import 'package:go_driver/features/home/data/models/route_prams.dart';
@@ -16,6 +18,11 @@ abstract class HomeDataSource {
 
   //Firebase
   Stream<List<OrderModel>> getOrders();
+  Future<void> acceptOrder({
+    required String orderId,
+    required AcceptModel acceptModel,
+  });
+  Future<void> updateLocation(LocationModel position, String orderId);
 }
 
 class HomeDataSourceImpl implements HomeDataSource {
@@ -56,7 +63,7 @@ class HomeDataSourceImpl implements HomeDataSource {
           .map((e) => LatLng(e.latitude, e.longitude))
           .toList(),
       distanceKm: distanceKm,
-      price: 0, //TODO: getPrice price
+      price: 0, //TODO: getPrice
       durationMin: (summary['duration'] as num).toDouble() / 600,
     );
   }
@@ -85,5 +92,24 @@ class HomeDataSourceImpl implements HomeDataSource {
               .map((doc) => OrderModel.fromJson(doc.data()))
               .toList(),
         );
+  }
+
+  @override
+  Future<void> acceptOrder({
+    required String orderId,
+    required AcceptModel acceptModel,
+  }) async {
+    await firestore
+        .collection(AppConstants.ordersCollection)
+        .doc(orderId)
+        .update(acceptModel.toJson());
+  }
+
+  @override
+  Future<void> updateLocation(LocationModel position, String orderId) async {
+    await firestore
+        .collection(AppConstants.ordersCollection)
+        .doc(orderId)
+        .update(position.toJson());
   }
 }

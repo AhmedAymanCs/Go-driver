@@ -1,6 +1,8 @@
 import 'package:dartz/dartz.dart';
 import 'package:go_driver/core/utils/typedef.dart';
 import 'package:go_driver/features/home/data/data_source/data_source.dart';
+import 'package:go_driver/features/home/data/models/accept_model.dart';
+import 'package:go_driver/features/home/data/models/location_model.dart';
 import 'package:go_driver/features/home/data/models/order_model.dart';
 import 'package:go_driver/features/home/data/models/route_model.dart';
 import 'package:go_driver/features/home/data/models/route_prams.dart';
@@ -15,12 +17,18 @@ abstract class HomeRepository {
 
   //Firebase
   ServerResponse<Stream<List<OrderModel>>> getOrders();
+  ServerResponse<Unit> acceptOrder({
+    required String orderId,
+    required AcceptModel acceptModel,
+  });
+  ServerResponse<Unit> updateLocation(LocationModel position, String orderId);
 }
 
 class HomeRepositoryImpl implements HomeRepository {
   final HomeDataSource _homeDataSource;
   HomeRepositoryImpl(this._homeDataSource);
 
+  //Map
   @override
   ServerResponse<List<Place>> searchPlaces(String query) async {
     try {
@@ -51,10 +59,40 @@ class HomeRepositoryImpl implements HomeRepository {
     }
   }
 
+  //Firebase
   @override
   ServerResponse<Stream<List<OrderModel>>> getOrders() async {
     try {
       return Right(_homeDataSource.getOrders());
+    } catch (e) {
+      return Left(e.toString());
+    }
+  }
+
+  @override
+  ServerResponse<Unit> acceptOrder({
+    required String orderId,
+    required AcceptModel acceptModel,
+  }) async {
+    try {
+      await _homeDataSource.acceptOrder(
+        orderId: orderId,
+        acceptModel: acceptModel,
+      );
+      return Right(unit);
+    } catch (e) {
+      return Left(e.toString());
+    }
+  }
+
+  @override
+  ServerResponse<Unit> updateLocation(
+    LocationModel position,
+    String orderId,
+  ) async {
+    try {
+      await _homeDataSource.updateLocation(position, orderId);
+      return Right(unit);
     } catch (e) {
       return Left(e.toString());
     }

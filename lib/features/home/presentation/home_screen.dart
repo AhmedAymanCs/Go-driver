@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:go_driver/core/constants/color_manager.dart';
 import 'package:go_driver/core/constants/font_manager.dart';
@@ -35,7 +36,9 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (context) => HomeCubit(getIt<HomeRepository>())..init(context),
+      create: (context) =>
+          HomeCubit(getIt<HomeRepository>(), getIt<FlutterSecureStorage>())
+            ..init(context),
       child: BlocConsumer<HomeCubit, HomeState>(
         listener: (context, state) {
           if (state.status == HomeStatus.error) {
@@ -135,7 +138,9 @@ class _HomePageState extends State<HomePage> {
                                                 state.orders![index],
                                               ),
                                           onReject: () => {},
-                                          onAccept: () => {},
+                                          onAccept: () => cubit.acceptOrder(
+                                            state.orders![index],
+                                          ),
                                         );
                                       },
                                     ),

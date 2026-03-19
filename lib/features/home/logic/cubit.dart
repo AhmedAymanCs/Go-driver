@@ -1,21 +1,27 @@
 import 'dart:async';
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:go_driver/core/constants/app_constants.dart';
 import 'package:go_driver/core/constants/color_manager.dart';
 import 'package:go_driver/core/constants/image_manager.dart';
 import 'package:go_driver/core/constants/styles_manager.dart';
+import 'package:go_driver/core/models/user_model.dart';
+import 'package:go_driver/features/home/data/models/accept_model.dart';
+import 'package:go_driver/features/home/data/models/location_model.dart';
 import 'package:go_driver/features/home/data/models/order_model.dart';
 import 'package:go_driver/features/home/data/models/route_prams.dart';
 import 'package:go_driver/features/home/data/repository/repo.dart';
 import 'package:go_driver/features/home/logic/states.dart';
-
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 class HomeCubit extends Cubit<HomeState> {
   final HomeRepository _homeRepository;
-  HomeCubit(this._homeRepository) : super(HomeState());
+  final FlutterSecureStorage _secureStorage;
+  HomeCubit(this._homeRepository, this._secureStorage) : super(HomeState());
 
   StreamSubscription<Position>?
   _positionStream; //for get current location stream
@@ -85,6 +91,15 @@ class HomeCubit extends Cubit<HomeState> {
             CameraUpdate.newLatLng(
               LatLng(position.latitude, position.longitude),
             ),
+          );
+        }
+        if (state.currentOrder != null) {
+          _homeRepository.updateLocation(
+            LocationModel(
+              latitude: position.latitude,
+              longitude: position.longitude,
+            ),
+            state.currentOrder!.id!,
           );
         }
       });
@@ -180,6 +195,26 @@ class HomeCubit extends Cubit<HomeState> {
       order.passengerLng,
     );
     return distanceInMeters / 1000;
+  }
+
+  Future<void> acceptOrder(OrderModel order) async {
+    final userSession = await _secureStorage.read(
+      key: AppConstants.userSession,
+    );
+    final user = UserModel.fromJson(jsonDecode(userSession!));
+    final res = await _homeRepository.acceptOrder(
+      orderId: order.id!,
+      acceptModel: AcceptModel(
+        driverId: user.uId ?? '',
+        driverName: user.name ?? '',
+        driverPhone: user.phone ?? '',
+      ),
+    );
+    res.fold(
+      (error) => emit(state.copyWith(error: error, status: HomeStatus.error)),
+      (_) =>
+          emit(state.copyWith(status: HomeStatus.success, currentOrder: order)),
+    );
   }
 
   @override
