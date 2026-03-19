@@ -113,39 +113,51 @@ class _HomePageState extends State<HomePage> {
                         child: state.isOnline
                             ? SingleChildScrollView(
                                 controller: scrollController,
-                                child: Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Container(
-                                      width: 40,
-                                      height: 4,
-                                      margin: const EdgeInsets.only(bottom: 12),
-                                      decoration: BoxDecoration(
-                                        color: ColorManager.gray500,
-                                        borderRadius: BorderRadius.circular(2),
-                                      ),
-                                    ),
-                                    ListView.builder(
-                                      shrinkWrap: true,
-                                      physics:
-                                          const NeverScrollableScrollPhysics(),
-                                      itemCount: state.orders?.length ?? 0,
-                                      itemBuilder: (context, index) {
-                                        return OrderItem(
-                                          order: state.orders![index],
-                                          distanceToPassenger: cubit
-                                              .getDistanceToPassenger(
-                                                state.orders![index],
-                                              ),
-                                          onReject: () => {},
-                                          onAccept: () => cubit.acceptOrder(
-                                            state.orders![index],
+                                child:
+                                    state.tripActionStatus !=
+                                        TripActionStatus.initial
+                                    ? TripActionButton(onPressed: () {})
+                                    : Column(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Container(
+                                            width: 40,
+                                            height: 4,
+                                            margin: const EdgeInsets.only(
+                                              bottom: 12,
+                                            ),
+                                            decoration: BoxDecoration(
+                                              color: ColorManager.gray500,
+                                              borderRadius:
+                                                  BorderRadius.circular(2),
+                                            ),
                                           ),
-                                        );
-                                      },
-                                    ),
-                                  ],
-                                ),
+                                          ListView.builder(
+                                            shrinkWrap: true,
+                                            physics:
+                                                const NeverScrollableScrollPhysics(),
+                                            itemCount:
+                                                state.orders?.length ?? 0,
+                                            itemBuilder: (context, index) {
+                                              return OrderItem(
+                                                order: state.orders![index],
+                                                distanceToPassenger: cubit
+                                                    .getDistanceToPassenger(
+                                                      state.orders![index],
+                                                    ),
+                                                onReject: () =>
+                                                    cubit.rejectOrder(
+                                                      state.orders![index],
+                                                    ),
+                                                onAccept: () =>
+                                                    cubit.acceptOrder(
+                                                      state.orders![index],
+                                                    ),
+                                              );
+                                            },
+                                          ),
+                                        ],
+                                      ),
                               )
                             : Center(child: Text('Offline Mode')),
                       );

@@ -1,7 +1,7 @@
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 class RouteModel {
-  final String placeName;
+  final String? placeName;
   final List<LatLng> points;
   final double distanceKm;
   final double durationMin;
@@ -10,7 +10,7 @@ class RouteModel {
     required this.points,
     required this.distanceKm,
     required this.durationMin,
-    required this.placeName,
+    this.placeName,
     required this.price,
   });
 

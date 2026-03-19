@@ -6,9 +6,12 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 enum HomeStatus { initial, loading, success, error }
 
+enum TripActionStatus { initial, goingToPassenger, arrived, inProgress }
+
 class HomeState extends Equatable {
   final bool isOnline;
   final HomeStatus status;
+  final TripActionStatus tripActionStatus;
   final String error;
   final String mapStyle;
   final GoogleMapController? controller;
@@ -23,6 +26,7 @@ class HomeState extends Equatable {
   final OrderModel? currentOrder;
   const HomeState({
     this.status = HomeStatus.initial,
+    this.tripActionStatus = TripActionStatus.initial,
     this.error = '',
     this.controller,
     this.mapStyle = '',
@@ -39,6 +43,7 @@ class HomeState extends Equatable {
   });
   HomeState copyWith({
     HomeStatus? status,
+    TripActionStatus? tripActionStatus,
     String? error,
     GoogleMapController? controller,
     String? mapStyle,
@@ -55,6 +60,7 @@ class HomeState extends Equatable {
   }) {
     return HomeState(
       status: status ?? this.status,
+      tripActionStatus: tripActionStatus ?? this.tripActionStatus,
       error: error ?? this.error,
       controller: controller ?? this.controller,
       mapStyle: mapStyle ?? this.mapStyle,
@@ -74,6 +80,7 @@ class HomeState extends Equatable {
   @override
   List<Object?> get props => [
     status,
+    tripActionStatus,
     error,
     controller,
     mapStyle,

@@ -109,7 +109,7 @@ class HomeCubit extends Cubit<HomeState> {
 
   Future<void> _loadCurrentLocationIcon() async {
     final icon = await BitmapDescriptor.asset(
-      const ImageConfiguration(size: Size(48, 48), devicePixelRatio: 2.0),
+      const ImageConfiguration(size: Size(28, 28), devicePixelRatio: 2.0),
       ImageManager.currentLocation,
     );
     emit(state.copyWith(currentLocationIcon: icon));
@@ -133,18 +133,14 @@ class HomeCubit extends Cubit<HomeState> {
     emit(state.copyWith(markers: updatedMarkers));
   }
 
-  Future<void> drawRoute(
-    LatLng destination, {
-    required String placeName,
-  }) async {
+  Future<void> drawRoute(LatLng destination) async {
     if (state.position == null) return;
     emit(state.copyWith(polylines: {}));
-    moveTo(destination, zoom: 12);
+    moveTo(destination, zoom: 14);
     final res = await _homeRepository.getRouteCoordinates(
       RoutePrams(
         destination: destination,
         position: LatLng(state.position!.latitude, state.position!.longitude),
-        placeName: placeName,
       ),
     );
     res.fold(
@@ -169,8 +165,10 @@ class HomeCubit extends Cubit<HomeState> {
     emit(state.copyWith(isOnline: !state.isOnline));
     if (state.isOnline) {
       listenToOrders();
+      getCurrentStreamLocation();
     } else {
       _ordersSubscription?.cancel();
+      _positionStream?.cancel();
       emit(state.copyWith(orders: []));
     }
   }
@@ -213,9 +211,21 @@ class HomeCubit extends Cubit<HomeState> {
     );
     res.fold(
       (error) => emit(state.copyWith(error: error, status: HomeStatus.error)),
-      (_) =>
-          emit(state.copyWith(status: HomeStatus.success, currentOrder: order)),
+      (_) {
+        drawRoute(LatLng(order.destinationLat, order.destinationLng));
+        emit(
+          state.copyWith(
+            tripActionStatus: TripActionStatus.goingToPassenger,
+            currentOrder: order,
+          ),
+        );
+      },
     );
+  }
+
+  void rejectOrder(OrderModel order) {
+    final updatedOrders = state.orders!.where((o) => o.id != order.id).toList();
+    emit(state.copyWith(orders: updatedOrders));
   }
 
   @override

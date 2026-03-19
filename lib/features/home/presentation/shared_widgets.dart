@@ -221,3 +221,51 @@ class OrderItem extends StatelessWidget {
     );
   }
 }
+
+class TripActionButton extends StatelessWidget {
+  final VoidCallback onPressed;
+  const TripActionButton({super.key, required this.onPressed});
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocBuilder<HomeCubit, HomeState>(
+      builder: (context, state) {
+        return Container(
+          padding: const EdgeInsets.all(20),
+          decoration: const BoxDecoration(
+            color: ColorManager.backgroundWhite,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+          ),
+          child: SizedBox(
+            width: double.infinity,
+            child: ElevatedButton(
+              onPressed: onPressed,
+              style: ElevatedButton.styleFrom(
+                backgroundColor:
+                    state.tripActionStatus == TripActionStatus.inProgress
+                    ? ColorManager.error
+                    : ColorManager.greenAccent,
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(vertical: 16),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(14),
+                ),
+              ),
+              child: Text(
+                state.tripActionStatus == TripActionStatus.goingToPassenger
+                    ? 'Arrived'
+                    : state.tripActionStatus == TripActionStatus.arrived
+                    ? 'Start Trip'
+                    : 'End Trip',
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+}

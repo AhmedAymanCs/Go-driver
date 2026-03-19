@@ -57,13 +57,12 @@ class HomeDataSourceImpl implements HomeDataSource {
         response.features[0].properties['summary'] as Map<String, dynamic>;
     final double distanceKm = (summary['distance'] as num).toDouble() / 1000;
     return RouteModel(
-      placeName: params.placeName,
       points: response.features[0].geometry.coordinates
           .expand((e) => e)
           .map((e) => LatLng(e.latitude, e.longitude))
           .toList(),
       distanceKm: distanceKm,
-      price: 0, //TODO: getPrice
+      price: 0,
       durationMin: (summary['duration'] as num).toDouble() / 600,
     );
   }
