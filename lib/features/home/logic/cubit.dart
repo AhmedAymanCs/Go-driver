@@ -98,6 +98,7 @@ class HomeCubit extends Cubit<HomeState> {
             LocationModel(
               latitude: position.latitude,
               longitude: position.longitude,
+              driverHeading: position.heading,
             ),
             state.currentOrder!.id!,
           );
