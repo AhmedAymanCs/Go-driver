@@ -1,3 +1,5 @@
+import 'package:go_driver/core/constants/trip_keywords.dart';
+
 class AcceptModel {
   final String? status;
   final String driverId;
@@ -5,7 +7,7 @@ class AcceptModel {
   final String driverPhone;
 
   const AcceptModel({
-    this.status = 'accepted',
+    this.status = TripKeywords.accepted,
     required this.driverId,
     required this.driverName,
     required this.driverPhone,

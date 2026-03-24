@@ -23,6 +23,7 @@ abstract class HomeDataSource {
     required AcceptModel acceptModel,
   });
   Future<void> updateLocation(LocationModel position, String orderId);
+  Future<void> updateTripStatus(String status, String orderId);
 }
 
 class HomeDataSourceImpl implements HomeDataSource {
@@ -34,6 +35,7 @@ class HomeDataSourceImpl implements HomeDataSource {
     required this.ors,
     required this.firestore,
   });
+  //Map
 
   @override
   Places searchPlaces(String query) async {
@@ -77,6 +79,7 @@ class HomeDataSourceImpl implements HomeDataSource {
     return place.displayName;
   }
 
+  //Firebaseas
   @override
   Stream<List<OrderModel>> getOrders() {
     return firestore
@@ -110,5 +113,13 @@ class HomeDataSourceImpl implements HomeDataSource {
         .collection(AppConstants.ordersCollection)
         .doc(orderId)
         .update(position.toJson());
+  }
+
+  @override
+  Future<void> updateTripStatus(String status, String orderId) async {
+    await firestore
+        .collection(AppConstants.ordersCollection)
+        .doc(orderId)
+        .update({'status': status});
   }
 }

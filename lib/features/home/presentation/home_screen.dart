@@ -116,7 +116,9 @@ class _HomePageState extends State<HomePage> {
                                 child:
                                     state.tripActionStatus !=
                                         TripActionStatus.initial
-                                    ? TripActionButton(onPressed: () {})
+                                    ? TripActionButton(
+                                        onPressed: () => cubit.tripAction(),
+                                      )
                                     : Column(
                                         mainAxisSize: MainAxisSize.min,
                                         children: [

@@ -8,6 +8,7 @@ import 'package:go_driver/core/constants/app_constants.dart';
 import 'package:go_driver/core/constants/color_manager.dart';
 import 'package:go_driver/core/constants/image_manager.dart';
 import 'package:go_driver/core/constants/styles_manager.dart';
+import 'package:go_driver/core/constants/trip_keywords.dart';
 import 'package:go_driver/core/models/user_model.dart';
 import 'package:go_driver/features/home/data/models/accept_model.dart';
 import 'package:go_driver/features/home/data/models/location_model.dart';
@@ -133,10 +134,12 @@ class HomeCubit extends Cubit<HomeState> {
     emit(state.copyWith(markers: updatedMarkers));
   }
 
-  Future<void> drawRoute(LatLng destination) async {
+  Future<void> drawRoute(LatLng destination, {bool move = true}) async {
     if (state.position == null) return;
     emit(state.copyWith(polylines: {}));
-    moveTo(destination, zoom: 14);
+    if (move) {
+      moveTo(destination, zoom: 14);
+    }
     final res = await _homeRepository.getRouteCoordinates(
       RoutePrams(
         destination: destination,
@@ -212,7 +215,7 @@ class HomeCubit extends Cubit<HomeState> {
     res.fold(
       (error) => emit(state.copyWith(error: error, status: HomeStatus.error)),
       (_) {
-        drawRoute(LatLng(order.destinationLat, order.destinationLng));
+        drawRoute(LatLng(order.passengerLat, order.passengerLng));
         emit(
           state.copyWith(
             tripActionStatus: TripActionStatus.goingToPassenger,
@@ -226,6 +229,50 @@ class HomeCubit extends Cubit<HomeState> {
   void rejectOrder(OrderModel order) {
     final updatedOrders = state.orders!.where((o) => o.id != order.id).toList();
     emit(state.copyWith(orders: updatedOrders));
+  }
+
+  Future<void> tripAction() async {
+    final orderId = state.currentOrder?.id;
+    if (orderId == null) return;
+
+    switch (state.tripActionStatus) {
+      case TripActionStatus.initial:
+        break;
+      case TripActionStatus.goingToPassenger:
+        await _homeRepository.updateTripStatus(
+          TripKeywords.driverArrived,
+          orderId,
+        );
+        emit(state.copyWith(tripActionStatus: TripActionStatus.arrived));
+        break;
+
+      case TripActionStatus.arrived:
+        await _homeRepository.updateTripStatus(
+          TripKeywords.inProgress,
+          orderId,
+        );
+        drawRoute(
+          LatLng(
+            state.currentOrder!.destinationLat,
+            state.currentOrder!.destinationLng,
+          ),
+          move: false,
+        );
+        emit(state.copyWith(tripActionStatus: TripActionStatus.inProgress));
+        break;
+
+      case TripActionStatus.inProgress:
+        await _homeRepository.updateTripStatus(TripKeywords.ended, orderId);
+        emit(
+          state.copyWith(
+            tripActionStatus: TripActionStatus.initial,
+            currentOrder: null,
+            polylines: {},
+            markers: {state.markers.last},
+          ),
+        );
+        break;
+    }
   }
 
   @override

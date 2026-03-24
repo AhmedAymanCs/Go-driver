@@ -22,6 +22,7 @@ abstract class HomeRepository {
     required AcceptModel acceptModel,
   });
   ServerResponse<Unit> updateLocation(LocationModel position, String orderId);
+  ServerResponse<Unit> updateTripStatus(String status, String orderId);
 }
 
 class HomeRepositoryImpl implements HomeRepository {
@@ -92,6 +93,16 @@ class HomeRepositoryImpl implements HomeRepository {
   ) async {
     try {
       await _homeDataSource.updateLocation(position, orderId);
+      return Right(unit);
+    } catch (e) {
+      return Left(e.toString());
+    }
+  }
+
+  @override
+  ServerResponse<Unit> updateTripStatus(String status, String orderId) async {
+    try {
+      await _homeDataSource.updateTripStatus(status, orderId);
       return Right(unit);
     } catch (e) {
       return Left(e.toString());
