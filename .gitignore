@@ -44,4 +44,4 @@ app.*.map.json
 /android/app/profile
 /android/app/release
 .env
-assets/json/go-app-3255c-dff7222326a7.json
+assets/json/key.json
