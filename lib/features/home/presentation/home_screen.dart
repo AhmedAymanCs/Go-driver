@@ -5,6 +5,7 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:go_driver/core/constants/color_manager.dart';
 import 'package:go_driver/core/constants/font_manager.dart';
 import 'package:go_driver/core/di/service_locator.dart';
+import 'package:go_driver/core/services/notification_service.dart';
 import 'package:go_driver/features/home/data/repository/repo.dart';
 import 'package:go_driver/features/home/logic/cubit.dart';
 import 'package:go_driver/features/home/logic/states.dart';
@@ -36,9 +37,11 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (context) =>
-          HomeCubit(getIt<HomeRepository>(), getIt<FlutterSecureStorage>())
-            ..init(context),
+      create: (context) => HomeCubit(
+        homeRepository: getIt<HomeRepository>(),
+        secureStorage: getIt<FlutterSecureStorage>(),
+        notificationService: getIt<NotificationService>(),
+      )..init(context),
       child: BlocConsumer<HomeCubit, HomeState>(
         listener: (context, state) {
           if (state.status == HomeStatus.error) {

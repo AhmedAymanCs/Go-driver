@@ -14,9 +14,11 @@ class OrderModel {
   final String? passengerPhone;
   final String? driverId;
   final double? driverLng;
+  final double? driverHeading;
   final double? driverLat;
   final String? driverName;
   final String? driverPhone;
+  final String? fcmToken;
   const OrderModel({
     this.id,
     required this.destination,
@@ -36,6 +38,8 @@ class OrderModel {
     this.driverLat,
     this.driverName,
     this.driverPhone,
+    this.driverHeading,
+    this.fcmToken,
   });
 
   factory OrderModel.fromJson(Map<String, dynamic> json) {
@@ -62,6 +66,8 @@ class OrderModel {
           : null,
       driverName: json['driver_name'] ?? 'Not Found',
       driverPhone: json['driver_phone'] ?? 'Not Found',
+      driverHeading: json['driver_heading'] ?? 0,
+      fcmToken: json['fcm_token'] ?? '',
     );
   }
   OrderModel copyWith({
@@ -81,8 +87,10 @@ class OrderModel {
     String? driverId,
     double? driverLat,
     double? driverLng,
+    double? driverHeading,
     String? driverName,
     String? driverPhone,
+    String? fcmToken,
   }) {
     return OrderModel(
       id: id ?? this.id,
@@ -103,6 +111,8 @@ class OrderModel {
       driverLng: driverLng ?? this.driverLng,
       driverName: driverName ?? this.driverName,
       driverPhone: driverPhone ?? this.driverPhone,
+      driverHeading: driverHeading ?? this.driverHeading,
+      fcmToken: fcmToken ?? this.fcmToken,
     );
   }
 
@@ -126,6 +136,8 @@ class OrderModel {
       'driver_lng': driverLng,
       'driver_name': driverName ?? 'Not Found',
       'driver_phone': driverPhone ?? 'Not Found',
+      'driver_heading': driverHeading ?? 0,
+      'fcm_token': fcmToken,
     };
   }
 }

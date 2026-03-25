@@ -46,12 +46,13 @@ dependencies:
   flutter_dotenv: ^6.0.0
   open_route_service: ^1.2.7
   osm_nominatim: ^4.0.1
-  supabase_flutter: ^2.12.0
   flutter_svg: ^2.2.4
   google_maps_flutter: ^2.15.0
   fluttertoast: ^9.0.0
   permission_handler: ^12.0.1
   geolocator: ^14.0.2
+  dio: ^5.9.2
+  googleapis_auth: ^2.0.0
 
 dev_dependencies:
   flutter_test:
@@ -81,6 +82,7 @@ flutter:
     - assets/svg/
     - assets/png/current_location.png
     - assets/styles/map_style.json
+    - assets/json/key.json
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images
 

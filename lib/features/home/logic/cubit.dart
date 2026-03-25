@@ -10,6 +10,7 @@ import 'package:go_driver/core/constants/image_manager.dart';
 import 'package:go_driver/core/constants/styles_manager.dart';
 import 'package:go_driver/core/constants/trip_keywords.dart';
 import 'package:go_driver/core/models/user_model.dart';
+import 'package:go_driver/core/services/notification_service.dart';
 import 'package:go_driver/features/home/data/models/accept_model.dart';
 import 'package:go_driver/features/home/data/models/location_model.dart';
 import 'package:go_driver/features/home/data/models/order_model.dart';
@@ -20,9 +21,14 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 class HomeCubit extends Cubit<HomeState> {
-  final HomeRepository _homeRepository;
-  final FlutterSecureStorage _secureStorage;
-  HomeCubit(this._homeRepository, this._secureStorage) : super(HomeState());
+  final HomeRepository homeRepository;
+  final FlutterSecureStorage secureStorage;
+  final NotificationService notificationService;
+  HomeCubit({
+    required this.homeRepository,
+    required this.secureStorage,
+    required this.notificationService,
+  }) : super(HomeState());
 
   StreamSubscription<Position>?
   _positionStream; //for get current location stream
@@ -95,7 +101,7 @@ class HomeCubit extends Cubit<HomeState> {
           );
         }
         if (state.currentOrder != null) {
-          _homeRepository.updateLocation(
+          homeRepository.updateLocation(
             LocationModel(
               latitude: position.latitude,
               longitude: position.longitude,
@@ -140,7 +146,7 @@ class HomeCubit extends Cubit<HomeState> {
     if (move) {
       moveTo(destination, zoom: 14);
     }
-    final res = await _homeRepository.getRouteCoordinates(
+    final res = await homeRepository.getRouteCoordinates(
       RoutePrams(
         destination: destination,
         position: LatLng(state.position!.latitude, state.position!.longitude),
@@ -177,7 +183,7 @@ class HomeCubit extends Cubit<HomeState> {
   }
 
   void listenToOrders() async {
-    final res = await _homeRepository.getOrders();
+    final res = await homeRepository.getOrders();
     res.fold(
       (error) => emit(state.copyWith(error: error, status: HomeStatus.error)),
       (stream) {
@@ -200,11 +206,14 @@ class HomeCubit extends Cubit<HomeState> {
   }
 
   Future<void> acceptOrder(OrderModel order) async {
-    final userSession = await _secureStorage.read(
-      key: AppConstants.userSession,
+    final userSession = await secureStorage.read(key: AppConstants.userSession);
+    notificationService.sendNotification(
+      token: order.fcmToken,
+      title: 'Order accepted',
+      body: 'Your order has been accepted',
     );
     final user = UserModel.fromJson(jsonDecode(userSession!));
-    final res = await _homeRepository.acceptOrder(
+    final res = await homeRepository.acceptOrder(
       orderId: order.id!,
       acceptModel: AcceptModel(
         driverId: user.uId ?? '',
@@ -239,7 +248,7 @@ class HomeCubit extends Cubit<HomeState> {
       case TripActionStatus.initial:
         break;
       case TripActionStatus.goingToPassenger:
-        await _homeRepository.updateTripStatus(
+        await homeRepository.updateTripStatus(
           TripKeywords.driverArrived,
           orderId,
         );
@@ -247,10 +256,7 @@ class HomeCubit extends Cubit<HomeState> {
         break;
 
       case TripActionStatus.arrived:
-        await _homeRepository.updateTripStatus(
-          TripKeywords.inProgress,
-          orderId,
-        );
+        await homeRepository.updateTripStatus(TripKeywords.inProgress, orderId);
         drawRoute(
           LatLng(
             state.currentOrder!.destinationLat,
@@ -262,7 +268,12 @@ class HomeCubit extends Cubit<HomeState> {
         break;
 
       case TripActionStatus.inProgress:
-        await _homeRepository.updateTripStatus(TripKeywords.ended, orderId);
+        await homeRepository.updateTripStatus(TripKeywords.ended, orderId);
+        notificationService.sendNotification(
+          token: state.currentOrder!.fcmToken,
+          title: 'Trip ended',
+          body: 'Your Are Arrived',
+        );
         emit(
           state.copyWith(
             tripActionStatus: TripActionStatus.initial,

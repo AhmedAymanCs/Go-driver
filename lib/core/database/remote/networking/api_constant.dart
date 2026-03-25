@@ -1,6 +1,9 @@
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+
 class ApiConstant {
-  static const String baseUrl = 'https://dummyjson.com/';
-  static const String productEndPoint = 'products';
+  static String get projectId => dotenv.env['PROJECT_ID'] ?? '';
+  static const String fcmBaseUrl = 'https://fcm.googleapis.com/';
+  static String get fcmEndPoint => 'v1/projects/$projectId/messages:send';
   static const Map<String, String> headers = {
     "Content-Type": "application/json",
     "Accept": "application/json",

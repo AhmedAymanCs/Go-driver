@@ -1,14 +1,17 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:dio/dio.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get_it/get_it.dart';
 import 'package:go_driver/core/constants/app_constants.dart';
+import 'package:go_driver/core/database/remote/networking/api_constant.dart';
+import 'package:go_driver/core/database/remote/networking/dio_helper.dart';
+import 'package:go_driver/core/services/notification_service.dart';
 import 'package:go_driver/features/home/data/data_source/data_source.dart';
 import 'package:go_driver/features/home/data/repository/repo.dart';
 import 'package:open_route_service/open_route_service.dart';
 import 'package:osm_nominatim/osm_nominatim.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:go_driver/core/database/local/secure_storage/secure_storage_helper.dart';
 import 'package:go_driver/features/auth/data/data_source/auth_data_source.dart';
 import 'package:go_driver/features/auth/data/repository/auth_repository.dart';
@@ -19,9 +22,10 @@ void intiSetupLocator() {
   _setupSecureStorageServiceLocator();
   _setupAuthRepositoryLocator();
   _setupFirestoreServiceLocator();
-  _setupSupabaseServiceLocator();
   _setupHomeServiceLocator();
   _setupOpenRouteServiceLocator();
+  _setupDioLocator();
+  _setupNotificationServiceLocator();
 }
 
 void _setupSecureStorageServiceLocator() {
@@ -59,15 +63,6 @@ void _setupFirestoreServiceLocator() {
   );
 }
 
-Future<void> _setupSupabaseServiceLocator() async {
-  String url = dotenv.env['SUPABASE_URL'] ?? '';
-  String apiKey = dotenv.env['SUPABASE_ANON_KEY'] ?? '';
-
-  await Supabase.initialize(url: url, anonKey: apiKey);
-
-  getIt.registerLazySingleton<SupabaseClient>(() => Supabase.instance.client);
-}
-
 void _setupHomeServiceLocator() {
   getIt.registerFactory<HomeRepository>(
     () => HomeRepositoryImpl(getIt<HomeDataSource>()),
@@ -85,4 +80,22 @@ void _setupOpenRouteServiceLocator() {
   getIt.registerLazySingleton<OpenRouteService>(
     () => OpenRouteService(apiKey: dotenv.env['ORS_API_KEY'] ?? ''),
   );
+}
+
+void _setupDioLocator() {
+  getIt.registerLazySingleton<Dio>(
+    () => Dio(
+      BaseOptions(
+        baseUrl: ApiConstant.fcmBaseUrl,
+        receiveTimeout: const Duration(seconds: ApiConstant.receiveTimeout),
+        connectTimeout: const Duration(seconds: ApiConstant.connectTimeout),
+        headers: ApiConstant.headers,
+      ),
+    ),
+  );
+  getIt.registerLazySingleton<DioHelper>(() => DioHelper(getIt<Dio>()));
+}
+
+void _setupNotificationServiceLocator() {
+  getIt.registerLazySingleton<NotificationService>(() => NotificationService());
 }
