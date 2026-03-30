@@ -84,21 +84,26 @@ class _HomePageState extends State<HomePage> {
                             ? Colors.transparent
                             : ColorManager.error,
                       ),
-                      child: SwitchListTile(
-                        value: state.isOnline,
-                        onChanged: (_) => cubit.toggleStatus(),
-                        title: Text(
-                          state.isOnline ? 'Online' : 'Offline',
-                          style: TextStyle(
-                            color: state.isOnline
-                                ? ColorManager.greenAccent
-                                : Colors.white,
-                            fontWeight: FontWeightManager.semiBold,
-                          ),
-                        ),
-                        activeThumbColor: ColorManager.greenAccent,
-                        inactiveThumbColor: ColorManager.error,
-                      ),
+                      child: state.currentOrder == null
+                          ? SwitchListTile(
+                              value: state.isOnline,
+                              onChanged: (_) => cubit.toggleStatus(),
+                              title: Text(
+                                state.isOnline ? 'Online' : 'Offline',
+                                style: TextStyle(
+                                  color: state.isOnline
+                                      ? ColorManager.greenAccent
+                                      : Colors.white,
+                                  fontWeight: FontWeightManager.semiBold,
+                                ),
+                              ),
+                              activeThumbColor: ColorManager.greenAccent,
+                              inactiveThumbColor: ColorManager.error,
+                            )
+                          : Text(
+                              'In Trip',
+                              style: TextStyle(color: ColorManager.textLight),
+                            ),
                     ),
                   ),
                   DraggableScrollableSheet(
