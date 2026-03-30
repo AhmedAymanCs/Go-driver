@@ -1,3 +1,4 @@
+import java.util.Base64
 plugins {
     id("com.android.application")
     // START: FlutterFire Configuration
@@ -7,6 +8,21 @@ plugins {
     // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
     id("dev.flutter.flutter-gradle-plugin")
 }
+
+val dartDefines = mutableMapOf<String, String>()
+if (project.hasProperty("dart-defines")) {
+    project.property("dart-defines")
+        .toString()
+        .split(",")
+        .forEach { entry ->
+            val decoded = Base64.getDecoder().decode(entry.trim()).toString(Charsets.UTF_8)
+            val pair = decoded.split("=")
+            if (pair.size == 2) {
+                dartDefines[pair[0]] = pair[1]
+            }
+        }
+}
+
 
 android {
     namespace = "com.example.go_driver"
@@ -31,6 +47,7 @@ android {
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
+        manifestPlaceholders["MAPS_API_KEY"] = dartDefines["MAPS_API_KEY"] ?: ""
     }
 
     buildTypes {

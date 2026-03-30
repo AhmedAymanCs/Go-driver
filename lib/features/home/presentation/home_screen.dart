@@ -84,7 +84,7 @@ class _HomePageState extends State<HomePage> {
                             ? Colors.transparent
                             : ColorManager.error,
                       ),
-                      child: state.currentOrder == null
+                      child: state.tripActionStatus == TripActionStatus.initial
                           ? SwitchListTile(
                               value: state.isOnline,
                               onChanged: (_) => cubit.toggleStatus(),
