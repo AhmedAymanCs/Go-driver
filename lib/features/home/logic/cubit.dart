@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:go_driver/core/constants/app_constants.dart';
 import 'package:go_driver/core/constants/color_manager.dart';
@@ -89,7 +90,7 @@ class HomeCubit extends Cubit<HomeState> {
   Future<void> getCurrentStreamLocation() async {
     await _checkPermission();
     if (state.isPermissionGranted) {
-      _positionStream = Geolocator.getPositionStream().listen((position) {
+      _positionStream = Geolocator.getPositionStream().listen((position) async {
         final bool alreadyMoved = state.hasMoved;
         emit(state.copyWith(position: position, hasMoved: true));
         _updateMarker();
@@ -101,7 +102,7 @@ class HomeCubit extends Cubit<HomeState> {
           );
         }
         if (state.currentOrder != null) {
-          homeRepository.updateLocation(
+          final res = await homeRepository.updateLocation(
             LocationModel(
               latitude: position.latitude,
               longitude: position.longitude,
@@ -109,6 +110,17 @@ class HomeCubit extends Cubit<HomeState> {
             ),
             state.currentOrder!.id!,
           );
+          res.fold((l) {
+            emit(
+              state.copyWith(
+                clearCurrentOrder: true,
+                tripActionStatus: TripActionStatus.initial,
+                polylines: {},
+                markers: {state.markers.last},
+              ),
+            );
+            Fluttertoast.showToast(msg: "Order has been canceled");
+          }, (r) {});
         }
       });
     }

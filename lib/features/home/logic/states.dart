@@ -57,6 +57,7 @@ class HomeState extends Equatable {
     List<OrderModel>? orders,
     bool? isOnline,
     OrderModel? currentOrder,
+    bool clearCurrentOrder = false,
   }) {
     return HomeState(
       status: status ?? this.status,
@@ -73,7 +74,9 @@ class HomeState extends Equatable {
       route: route ?? this.route,
       orders: orders ?? this.orders,
       isOnline: isOnline ?? this.isOnline,
-      currentOrder: currentOrder ?? this.currentOrder,
+      currentOrder: clearCurrentOrder
+          ? null
+          : (currentOrder ?? this.currentOrder),
     );
   }
 
